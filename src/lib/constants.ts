@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import { Architecture, Paintbrush, Cog, Database, Rocket, BrainCircuit, BarChart, CalendarDays, GraduationCap, PenSquare, ShoppingBag, Smartphone } from 'lucide-react';
+import { Network, Paintbrush, Cog, Database, Rocket, BrainCircuit, BarChart, CalendarDays, GraduationCap, PenSquare, ShoppingBag, Smartphone } from 'lucide-react';
 import { GitHubIcon, SupabaseIcon, VercelIcon } from '@/components/icons';
 
 export type Agent = {
@@ -10,7 +10,7 @@ export type Agent = {
 };
 
 export const AGENTS: Agent[] = [
-  { id: 'architect', name: 'System Architect', description: 'Designing app structure', icon: Architecture },
+  { id: 'architect', name: 'System Architect', description: 'Designing app structure', icon: Network },
   { id: 'frontend', name: 'Frontend Developer', description: 'Building user interface', icon: Paintbrush },
   { id: 'backend', name: 'Backend Developer', description: 'Creating API endpoints', icon: Cog },
   { id: 'database', name: 'Database Engineer', description: 'Setting up data models', icon: Database },
