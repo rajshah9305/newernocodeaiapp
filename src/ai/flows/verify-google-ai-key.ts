@@ -8,7 +8,7 @@
  * - VerifyGoogleAIKeyOutput - The return type for the verifyGoogleAIKey function.
  */
 
-import {genkit, z} from 'genkit';
+import {z, generate} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
 import { ai } from '@/ai/genkit';
 
@@ -41,39 +41,36 @@ const verifyGoogleAIKeyFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      // Create a temporary AI instance with the provided key to test it
-      const tempAi = genkit({
-        plugins: [googleAI({apiKey: input.apiKey})],
+      // Temporarily use the provided API key to make a test call.
+      // We use a simple, low-cost model and a short prompt.
+      await generate({
+        model: googleAI('gemini-pro', { apiKey: input.apiKey }),
+        prompt: 'test',
+        config: {
+            maxOutputTokens: 1,
+        }
       });
-      
-      if (!tempAi) {
-        return { success: false, message: 'Failed to initialize the AI client.' };
-      }
 
-      // We list models as a simple verification check
-      const { models } = await tempAi.listModels({
-        model: 'googleai/gemini-pro', // A common model to check against
-      });
-      
-      if (models.length > 0) {
-        return { success: true };
-      } else {
-        return { success: false, message: 'No models found. The key may have limited permissions.' };
-      }
+      // If the above call doesn't throw, the key is valid.
+      return { success: true };
 
     } catch (error: any) {
       console.error('API key verification failed:', error);
       let message = 'An unknown error occurred during verification.';
+      
+      // Attempt to parse more specific error messages from the caught error.
       if (error.message) {
-        // Extract a more user-friendly error message if possible
         if (error.message.includes('API key not valid')) {
           message = 'The provided API key is not valid. Please check the key and try again.';
         } else if (error.message.includes('permission')) {
            message = 'The provided API key does not have the necessary permissions.';
+        } else if (error.message.includes('found for model')) {
+           message = 'The provided API key does not have access to the required models.';
         } else {
-           message = error.message;
+           message = 'Failed to verify the key. It might be invalid, expired, or lack permissions.';
         }
       }
+      
       return {
         success: false,
         message: message,
