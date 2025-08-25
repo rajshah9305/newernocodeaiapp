@@ -46,6 +46,10 @@ const verifyGoogleAIKeyFlow = ai.defineFlow(
         plugins: [googleAI({apiKey: input.apiKey})],
       });
       
+      if (!tempGenkit.ai) {
+        return { success: false, message: 'Failed to initialize the AI client.' };
+      }
+
       // We list models as a simple verification check
       const { models } = await tempGenkit.ai.listModels({
         model: 'googleai/gemini-pro', // A common model to check against
