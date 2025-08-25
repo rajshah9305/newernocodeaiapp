@@ -47,7 +47,7 @@ const verifyGoogleAIKeyFlow = ai.defineFlow(
       });
       
       // We list models as a simple verification check
-      const { models } = await tempGenkit.listModels({
+      const { models } = await tempGenkit.ai.listModels({
         model: 'googleai/gemini-pro', // A common model to check against
       });
       
