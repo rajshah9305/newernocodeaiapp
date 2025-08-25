@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { X, Eye, EyeOff } from 'lucide-react';
 import { API_SERVICES } from '@/lib/constants';
 import type { ApiKeys, ApiKey } from '@/app/page';
+import { verifyGoogleAIKey } from '@/ai/flows/verify-google-ai-key';
+import { useToast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -17,19 +19,57 @@ type SettingsPanelProps = {
 };
 
 export const SettingsPanel = ({ setShowSettings, apiKeys, setApiKeys, connectedServices }: SettingsPanelProps) => {
+  const { toast } = useToast();
 
-  const handleTest = (id: keyof ApiKeys) => {
-    // Mock API key test
+  const handleTest = async (id: keyof ApiKeys) => {
     setApiKeys(prev => ({
       ...prev,
       [id]: { ...prev[id], status: 'testing' }
     }));
-    setTimeout(() => {
-      setApiKeys(prev => ({
-        ...prev,
-        [id]: { ...prev[id], status: 'connected' }
-      }));
-    }, 1000);
+
+    if (id === 'googleai') {
+      try {
+        const result = await verifyGoogleAIKey({ apiKey: apiKeys.googleai.value });
+        if (result.success) {
+          setApiKeys(prev => ({
+            ...prev,
+            [id]: { ...prev[id], status: 'connected' }
+          }));
+          toast({
+            title: "Connection Successful",
+            description: "Your Google AI API key is valid.",
+          });
+        } else {
+          setApiKeys(prev => ({
+            ...prev,
+            [id]: { ...prev[id], status: 'disconnected' }
+          }));
+          toast({
+            variant: "destructive",
+            title: "Connection Failed",
+            description: result.message || "Invalid Google AI API key.",
+          });
+        }
+      } catch (error) {
+        setApiKeys(prev => ({
+          ...prev,
+          [id]: { ...prev[id], status: 'disconnected' }
+        }));
+        toast({
+          variant: "destructive",
+          title: "Connection Failed",
+          description: "An unexpected error occurred.",
+        });
+      }
+    } else {
+      // Mock other API key tests
+      setTimeout(() => {
+        setApiKeys(prev => ({
+          ...prev,
+          [id]: { ...prev[id], status: 'connected' }
+        }));
+      }, 1000);
+    }
   }
 
   const handleKeyChange = (id: keyof ApiKeys, value: string) => {
