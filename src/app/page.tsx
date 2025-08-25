@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { suggestAppName, GenerateAppNameOutput } from '@/ai/flows/suggest-app-name';
-import { generateFeatures, GenerateFeaturesOutput } from '@/ai/flows/smart-feature-listing';
+import { suggestAppName } from '@/ai/flows/suggest-app-name';
+import { generateFeatures } from '@/ai/flows/smart-feature-listing';
 
 import { Header } from '@/components/header';
 import { InputStage } from '@/components/input-stage';
@@ -109,25 +109,30 @@ export default function AIAppForgePage() {
           generateFeatures({ appDescription })
         ]);
         
-        setGeneratedApp({
+        const generatedAppData: Omit<GeneratedApp, 'components' | 'pages' | 'apiEndpoints' | 'performance' | 'buildTime' | 'codeStats'> = {
           name: appNameResult.appName,
           type: "Full-Stack Web Application",
           framework: "Next.js + TypeScript",
           deployment: "Vercel",
+          deploymentReady: true,
+          features: featuresResult.features,
+        };
+
+        // Defer random number generation to the client side to avoid hydration errors
+        setGeneratedApp(prev => ({
+          ...generatedAppData,
           components: Math.floor(Math.random() * 10) + 10,
           pages: Math.floor(Math.random() * 5) + 5,
           apiEndpoints: Math.floor(Math.random() * 10) + 10,
-          deploymentReady: true,
           performance: Math.floor(Math.random() * 10) + 90,
           buildTime: `${Math.floor(Math.random() * 2)}m ${Math.floor(Math.random() * 59)}s`,
-          features: featuresResult.features,
           codeStats: { 
             linesOfCode: Math.floor(Math.random() * 2000) + 1500,
             testCoverage: Math.floor(Math.random() * 10) + 90,
             performanceScore: Math.floor(Math.random() * 10) + 90,
           },
-        });
-        
+        }));
+
         setCurrentStep('result');
       } catch (error) {
         console.error("AI generation failed:", error);
@@ -143,6 +148,24 @@ export default function AIAppForgePage() {
       }
     });
   };
+
+  useEffect(() => {
+    if (currentStep === 'result' && generatedApp) {
+      setGeneratedApp(prev => ({
+        ...prev!,
+        components: Math.floor(Math.random() * 10) + 10,
+        pages: Math.floor(Math.random() * 5) + 5,
+        apiEndpoints: Math.floor(Math.random() * 10) + 10,
+        performance: Math.floor(Math.random() * 10) + 90,
+        buildTime: `${Math.floor(Math.random() * 2)}m ${Math.floor(Math.random() * 59)}s`,
+        codeStats: { 
+          linesOfCode: Math.floor(Math.random() * 2000) + 1500,
+          testCoverage: Math.floor(Math.random() * 10) + 90,
+          performanceScore: Math.floor(Math.random() * 10) + 90,
+        },
+      }));
+    }
+  }, [currentStep]);
 
   const handleCreateAnotherApp = () => {
     setCurrentStep('input');

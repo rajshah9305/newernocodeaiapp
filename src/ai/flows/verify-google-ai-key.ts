@@ -41,13 +41,14 @@ const verifyGoogleAIKeyFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      // Create a temporary Google AI plugin instance with the provided key
-      const tempGoogleAI = googleAI({apiKey: input.apiKey});
+      // Create a temporary Genkit instance with the provided key to test it
+      const tempGenkit = genkit({
+        plugins: [googleAI({apiKey: input.apiKey})],
+      });
       
       // We list models as a simple verification check
-      const { models } = await genkit.listModels({
-        plugins: [tempGoogleAI],
-        model: 'googleai/gemini-2.5-flash',
+      const { models } = await tempGenkit.listModels({
+        model: 'googleai/gemini-pro', // A common model to check against
       });
       
       if (models.length > 0) {
@@ -58,10 +59,20 @@ const verifyGoogleAIKeyFlow = ai.defineFlow(
 
     } catch (error: any) {
       console.error('API key verification failed:', error);
+      let message = 'An unknown error occurred during verification.';
+      if (error.message) {
+        // Extract a more user-friendly error message if possible
+        if (error.message.includes('API key not valid')) {
+          message = 'The provided API key is not valid. Please check the key and try again.';
+        } else if (error.message.includes('permission')) {
+           message = 'The provided API key does not have the necessary permissions.';
+        } else {
+           message = error.message;
+        }
+      }
       return {
         success: false,
-        message:
-          error.message || 'An unknown error occurred during verification.',
+        message: message,
       };
     }
   }
