@@ -3,6 +3,7 @@
 import React from 'react';
 import { Settings } from 'lucide-react';
 import { Button } from './ui/button';
+import { API_SERVICES } from '@/lib/constants';
 
 type HeaderProps = {
   activeTab: string;
@@ -49,8 +50,8 @@ export const Header = ({ activeTab, setActiveTab, connectedServices, canGenerate
 
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <div className={`w-2.5 h-2.5 rounded-full ${canGenerate ? 'bg-green-400' : 'bg-orange-400'}`} />
-            <span className="text-sm text-gray-600 dark:text-gray-300">{connectedServices}/4 connected</span>
+            <div className={`w-2.5 h-2.5 rounded-full transition-colors ${canGenerate ? 'bg-green-400' : 'bg-orange-400'}`} />
+            <span className="text-sm text-gray-600 dark:text-gray-300">{connectedServices}/{API_SERVICES.length} connected</span>
           </div>
           <Button
             variant="ghost"

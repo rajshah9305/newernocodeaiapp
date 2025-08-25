@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { AGENTS } from '@/lib/constants';
 
 type InputStageProps = {
@@ -35,22 +35,19 @@ export const InputStage = ({ appDescription, setAppDescription, isGenerating, ca
     </div>
 
     <Card className="mb-8 shadow-xl">
-      <CardContent className="p-8">
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-            Describe your app idea
-          </label>
-          <Textarea
-            value={appDescription}
-            onChange={(e) => setAppDescription(e.target.value)}
-            placeholder="I want to build a task management app with real-time collaboration, user authentication, and project analytics..."
-            className="w-full h-32 text-base"
-            disabled={isGenerating}
-            maxLength={500}
-          />
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <CardHeader>
+        <CardTitle className="text-xl font-headline">Describe your app idea</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Textarea
+          value={appDescription}
+          onChange={(e) => setAppDescription(e.target.value)}
+          placeholder="I want to build a task management app with real-time collaboration, user authentication, and project analytics..."
+          className="w-full h-32 text-base"
+          disabled={isGenerating}
+          maxLength={500}
+        />
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
           <div className="text-sm text-gray-500 dark:text-gray-400">
             {appDescription.length}/500 characters
           </div>
@@ -70,6 +67,7 @@ export const InputStage = ({ appDescription, setAppDescription, isGenerating, ca
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle className="font-headline text-lg">Example Apps</CardTitle>
+          <CardDescription>Click one to get started</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -89,6 +87,7 @@ export const InputStage = ({ appDescription, setAppDescription, isGenerating, ca
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle className="font-headline text-lg">AI Agents Ready</CardTitle>
+          <CardDescription>This crew will build your app</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">

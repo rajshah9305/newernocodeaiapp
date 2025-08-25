@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, LoaderCircle } from 'lucide-react';
+import { Check, LoaderCircle, AlertTriangle } from 'lucide-react';
 import type { Agent } from '@/lib/constants';
 
 type AgentState = Agent & {
-  status: 'pending' | 'working' | 'complete';
+  status: 'pending' | 'working' | 'complete' | 'error';
   progress: number;
 };
 
@@ -50,7 +50,7 @@ export const GenerationStage = ({ agentStates, activeAgent, generationProgress, 
           transition={{ delay: index * 0.1 }}
           className={`bg-white dark:bg-card rounded-xl p-6 shadow-md border-2 transition-all duration-300 ${
             activeAgent === agent.id ? 'border-primary shadow-lg' : 'border-transparent'
-          }`}
+          } ${agent.status === 'error' ? 'border-destructive' : ''}`}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-4">
@@ -65,13 +65,17 @@ export const GenerationStage = ({ agentStates, activeAgent, generationProgress, 
               {agent.status === 'working' && (
                 <LoaderCircle className="animate-spin w-5 h-5 text-primary" />
               )}
+               {agent.status === 'error' && (
+                <AlertTriangle className="w-5 h-5 text-destructive" />
+              )}
             </div>
           </div>
           
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
             <motion.div
               className={`h-1.5 rounded-full ${
-                agent.status === 'complete' ? 'bg-green-500' : 'bg-primary'
+                agent.status === 'complete' ? 'bg-green-500' : 
+                agent.status === 'error' ? 'bg-destructive' : 'bg-primary'
               }`}
               initial={{ width: 0 }}
               animate={{ width: `${agent.progress}%` }}

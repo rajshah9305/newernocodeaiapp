@@ -14,7 +14,7 @@ import { ProjectsTab } from '@/components/projects-tab';
 import { TemplatesTab } from '@/components/templates-tab';
 import { SettingsPanel } from '@/components/settings-panel';
 import { AIChatAssistant } from '@/components/ai-chat-assistant';
-import { AGENTS, API_SERVICES, EXAMPLE_APPS, PROJECTS, Agent, ApiService } from '@/lib/constants';
+import { AGENTS, API_SERVICES, EXAMPLE_APPS, Agent, ApiService } from '@/lib/constants';
 import type { Project } from '@/lib/constants';
 import { useToast } from "@/hooks/use-toast"
 
@@ -28,7 +28,7 @@ export type ApiKey = {
 export type ApiKeys = Record<ApiService['id'], ApiKey>;
 
 type AgentState = Agent & {
-  status: 'pending' | 'working' | 'complete';
+  status: 'pending' | 'working' | 'complete' | 'error';
   progress: number;
 }
 
@@ -77,8 +77,56 @@ export default function AIAppForgePage() {
   const canGenerate = apiKeys.googleai.status === 'connected';
   const connectedServices = Object.values(apiKeys).filter(key => key.status === 'connected').length;
 
+  const updateAgentState = (agentId: string, status: AgentState['status'], progress?: number) => {
+    setAgentStates(prev => prev.map(a => 
+      a.id === agentId 
+        ? { ...a, status, progress: progress !== undefined ? progress : a.progress } 
+        : a
+    ));
+  };
+  
+  const runAgent = async (agentId: string, duration: number, task?: () => Promise<any>) => {
+    setActiveAgent(agentId);
+    updateAgentState(agentId, 'working', 0);
+  
+    const startTime = Date.now();
+    let result;
+  
+    const updateProgress = () => {
+      const elapsedTime = Date.now() - startTime;
+      const progress = Math.min(Math.floor((elapsedTime / duration) * 100), 99);
+      updateAgentState(agentId, 'working', progress);
+      setGenerationProgress(prev => Math.max(prev, prev + 1));
+    };
+  
+    const interval = setInterval(updateProgress, 100);
+  
+    try {
+      if (task) {
+        result = await task();
+      } else {
+        await new Promise(resolve => setTimeout(resolve, duration));
+      }
+      updateAgentState(agentId, 'complete', 100);
+    } catch (error) {
+      console.error(`Agent ${agentId} failed:`, error);
+      updateAgentState(agentId, 'error', 100);
+      throw error;
+    } finally {
+      clearInterval(interval);
+      setActiveAgent(null);
+    }
+  
+    return result;
+  };
+
   const generateApp = () => {
     if (!canGenerate) {
+      toast({
+        variant: "destructive",
+        title: "Cannot Generate App",
+        description: "Please connect your Google AI API key in the settings.",
+      })
       setShowSettings(true);
       return;
     }
@@ -86,27 +134,18 @@ export default function AIAppForgePage() {
     setIsGenerating(true);
     setCurrentStep('generation');
     setAgentStates(AGENTS.map(agent => ({ ...agent, status: 'pending', progress: 0 })));
+    setGenerationProgress(0);
 
     startTransition(async () => {
-      // Simulate AI agent workflow
-      for (let i = 0; i < AGENTS.length; i++) {
-        const agent = AGENTS[i];
-        setActiveAgent(agent.id);
-        setAgentStates(prev => prev.map(a => a.id === agent.id ? { ...a, status: 'working' } : a));
-
-        for (let progress = 0; progress <= 100; progress += 5) {
-          await new Promise(resolve => setTimeout(resolve, 30));
-          setAgentStates(prev => prev.map(a => a.id === agent.id ? { ...a, progress } : a));
-          setGenerationProgress(((i * 100) + progress) / AGENTS.length);
-        }
-
-        setAgentStates(prev => prev.map(a => a.id === agent.id ? { ...a, status: 'complete', progress: 100 } : a));
-      }
-
       try {
+        await runAgent('architect', 1500);
+        await runAgent('frontend', 2000);
+        await runAgent('backend', 2000);
+        await runAgent('database', 1500);
+
         const [appNameResult, featuresResult] = await Promise.all([
-          suggestAppName({ appDescription }),
-          generateFeatures({ appDescription })
+          runAgent('devops', 1000, () => suggestAppName({ appDescription })),
+          runAgent('architect', 1000, () => generateFeatures({ appDescription })),
         ]);
         
         const generatedAppData: Omit<GeneratedApp, 'components' | 'pages' | 'apiEndpoints' | 'performance' | 'buildTime' | 'codeStats'> = {
@@ -118,28 +157,15 @@ export default function AIAppForgePage() {
           features: featuresResult.features,
         };
 
-        // Defer random number generation to the client side to avoid hydration errors
-        setGeneratedApp(prev => ({
-          ...generatedAppData,
-          components: Math.floor(Math.random() * 10) + 10,
-          pages: Math.floor(Math.random() * 5) + 5,
-          apiEndpoints: Math.floor(Math.random() * 10) + 10,
-          performance: Math.floor(Math.random() * 10) + 90,
-          buildTime: `${Math.floor(Math.random() * 2)}m ${Math.floor(Math.random() * 59)}s`,
-          codeStats: { 
-            linesOfCode: Math.floor(Math.random() * 2000) + 1500,
-            testCoverage: Math.floor(Math.random() * 10) + 90,
-            performanceScore: Math.floor(Math.random() * 10) + 90,
-          },
-        }));
-
+        setGeneratedApp(generatedAppData);
         setCurrentStep('result');
+
       } catch (error) {
         console.error("AI generation failed:", error);
         toast({
           variant: "destructive",
           title: "Generation Failed",
-          description: "Could not generate app details. Please try again.",
+          description: "An AI agent failed to complete its task. Please try again.",
         })
         setCurrentStep('input');
       } finally {
@@ -151,8 +177,10 @@ export default function AIAppForgePage() {
 
   useEffect(() => {
     if (currentStep === 'result' && generatedApp) {
-      setGeneratedApp(prev => ({
-        ...prev!,
+      setGeneratedApp(prev => {
+        if (!prev) return null;
+        return {
+        ...prev,
         components: Math.floor(Math.random() * 10) + 10,
         pages: Math.floor(Math.random() * 5) + 5,
         apiEndpoints: Math.floor(Math.random() * 10) + 10,
@@ -163,9 +191,10 @@ export default function AIAppForgePage() {
           testCoverage: Math.floor(Math.random() * 10) + 90,
           performanceScore: Math.floor(Math.random() * 10) + 90,
         },
-      }));
+      }});
     }
-  }, [currentStep]);
+  }, [currentStep, generatedApp]);
+
 
   const handleCreateAnotherApp = () => {
     setCurrentStep('input');
@@ -178,7 +207,7 @@ export default function AIAppForgePage() {
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'projects':
-        return <ProjectsTab projects={PROJECTS} setActiveTab={setActiveTab} />;
+        return <ProjectsTab setActiveTab={setActiveTab} />;
       case 'templates':
         return <TemplatesTab setActiveTab={setActiveTab} setAppDescription={setAppDescription} />;
       case 'builder':
@@ -233,7 +262,6 @@ export default function AIAppForgePage() {
             setShowSettings={setShowSettings}
             apiKeys={apiKeys}
             setApiKeys={setApiKeys}
-            connectedServices={connectedServices}
           />
         )}
       </AnimatePresence>
