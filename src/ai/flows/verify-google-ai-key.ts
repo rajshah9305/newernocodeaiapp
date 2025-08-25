@@ -41,17 +41,17 @@ const verifyGoogleAIKeyFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      // Create a temporary Genkit instance with the provided key to test it
-      const tempGenkit = genkit({
+      // Create a temporary AI instance with the provided key to test it
+      const tempAi = genkit({
         plugins: [googleAI({apiKey: input.apiKey})],
       });
       
-      if (!tempGenkit.ai) {
+      if (!tempAi) {
         return { success: false, message: 'Failed to initialize the AI client.' };
       }
 
       // We list models as a simple verification check
-      const { models } = await tempGenkit.ai.listModels({
+      const { models } = await tempAi.listModels({
         model: 'googleai/gemini-pro', // A common model to check against
       });
       
