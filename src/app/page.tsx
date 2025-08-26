@@ -138,23 +138,33 @@ export default function AIAppForgePage() {
 
     startTransition(async () => {
       try {
-        await runAgent('architect', 1500);
-        await runAgent('frontend', 2000);
-        await runAgent('backend', 2000);
-        await runAgent('database', 1500);
-
         const [appNameResult, featuresResult] = await Promise.all([
           runAgent('devops', 1000, () => suggestAppName({ appDescription })),
           runAgent('architect', 1000, () => generateFeatures({ appDescription })),
         ]);
         
-        const generatedAppData: Omit<GeneratedApp, 'components' | 'pages' | 'apiEndpoints' | 'performance' | 'buildTime' | 'codeStats'> = {
+        await runAgent('frontend', 2000);
+        await runAgent('backend', 2000);
+        await runAgent('database', 1500);
+
+        const generatedAppData: GeneratedApp = {
           name: appNameResult.appName,
           type: "Full-Stack Web Application",
           framework: "Next.js + TypeScript",
           deployment: "Vercel",
           deploymentReady: true,
           features: featuresResult.features,
+          // These will be populated by the useEffect below
+          components: 0,
+          pages: 0,
+          apiEndpoints: 0,
+          performance: 0,
+          buildTime: '',
+          codeStats: {
+            linesOfCode: 0,
+            testCoverage: 0,
+            performanceScore: 0,
+          },
         };
 
         setGeneratedApp(generatedAppData);
@@ -176,7 +186,10 @@ export default function AIAppForgePage() {
   };
 
   useEffect(() => {
-    if (currentStep === 'result' && generatedApp) {
+    // This effect runs only on the client after the component mounts.
+    // It populates the "random" stats for the generated app.
+    // This avoids hydration mismatches between server and client.
+    if (currentStep === 'result' && generatedApp && generatedApp.buildTime === '') {
       setGeneratedApp(prev => {
         if (!prev) return null;
         return {
