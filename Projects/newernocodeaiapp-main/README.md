@@ -1,24 +1,28 @@
-# AI App Builder - Multi-Agent Workflow System
+# AI App Builder Enterprise - Multi-Agent Workflow System
 
-A production-ready Next.js application that uses CrewAI-inspired multi-agent workflows powered by Cerebras AI to generate full-stack web applications. Features real-time agent coordination, live preview, and instant deployment capabilities.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 
-## 🚀 Features
+Enterprise-grade AI application builder using CrewAI-inspired multi-agent workflows powered by Cerebras AI. Generate full-stack web applications with real-time agent coordination, live preview, and instant deployment capabilities.
 
-- **Multi-Agent Workflow**: Orchestrated team of AI agents (Architect, UI/UX, Backend, Database, Tester, DevOps)
+## 🚀 Enterprise Features
+
+- **Multi-Agent Orchestration**: Coordinated AI agents (Architect, UI/UX, Backend, Database, Tester, DevOps)
 - **Cerebras AI Integration**: High-performance inference with Llama models
-- **Real-time Generation**: Live progress tracking with actual AI API calls
-- **Live Preview**: Instant app preview with responsive design testing
-- **Code Editor**: Built-in Monaco editor with syntax highlighting
-- **One-Click Deployment**: Ready for Vercel, Netlify, and other platforms
-- **API Management**: Complete integration with Vercel, Supabase, and GitHub APIs
+- **Real-time Generation**: Live progress tracking with enterprise-grade monitoring
+- **Security First**: Built-in security headers, input validation, and secret management
+- **Docker Support**: Containerized deployment with health checks
+- **Enterprise Monitoring**: Health endpoints and logging
+- **Production Ready**: Optimized builds and performance monitoring
 
 ## 🏗️ Architecture
 
 ```
-User Input (NLP Prompt)
+Enterprise Load Balancer
        │
        ▼
- Orchestrator Agent
+ AI App Builder (Docker)
        │
  ┌─────┼───────────────────────┐
  │     │       │       │       │
@@ -26,18 +30,18 @@ User Input (NLP Prompt)
 UI Agent   Backend   DB     Tester   Deployment
   │         Agent    Agent   Agent     Agent
   │            │       │       │        │
-  └─────> Code Assembly (Project Dir) <─┘
+  └─────> Code Assembly (Secure) <─────┘
                     │
                     ▼
-             Live Preview Server
+        Enterprise Preview Server
                     │
        ┌────────────┴────────────┐
        ▼                         ▼
-   User Edits Code        User Refines via NLP
+   Secure Editing         Enterprise Deploy
        │                         │
        └───────────┬─────────────┘
                    ▼
-             Final Deployment
+          Production Deployment
 ```
 
 ## 🛠️ Tech Stack
@@ -45,60 +49,71 @@ UI Agent   Backend   DB     Tester   Deployment
 - **Frontend**: Next.js 15, TypeScript, Tailwind CSS, Framer Motion
 - **AI**: Cerebras Cloud SDK, Multi-agent orchestration
 - **UI**: Radix UI components, Monaco Editor
-- **Deployment**: Vercel-ready with environment configuration
+- **Security**: Built-in headers, input validation, rate limiting
+- **Deployment**: Docker, Docker Compose, Vercel-ready
+- **Monitoring**: Health checks, logging, error tracking
 
-## 📦 Installation
+## 📦 Quick Start
 
-### Quick Start
+### Docker Deployment (Recommended)
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd ai-app-builder
+# Clone repository
+git clone https://github.com/rajshah9305/newernocodeaiapp.git
+cd newernocodeaiapp
 
-# Run setup script
-chmod +x setup.sh
-./setup.sh
+# Configure environment
+cp .env.example .env.local
+# Add your Cerebras API key
 
-# Start development server
-npm run dev
+# Deploy with Docker
+docker-compose up -d
+
+# Access application
+open http://localhost:9002
 ```
 
-### Manual Setup
+### Development Setup
 ```bash
 # Install dependencies
 npm install
 
 # Configure environment
 cp .env.example .env.local
-# Add your Cerebras API key to .env.local
+# Add your API keys
 
-# Start development
+# Start development server
 npm run dev
 ```
 
-## 🔑 API Configuration
+## 🔑 Configuration
 
-### Required
-- **Cerebras AI**: Get your API key from [Cerebras Inference](https://inference.cerebras.ai/)
+### Required Environment Variables
+```bash
+CEREBRAS_API_KEY=your-cerebras-api-key
+NODE_ENV=production
+NEXT_PUBLIC_APP_URL=https://your-domain.com
+```
 
-### Optional (Enhanced Features)
-- **Vercel**: For automated deployment
-- **Supabase**: For database services
-- **GitHub**: For repository management
+### Optional Enterprise Features
+```bash
+VERCEL_API_KEY=your-vercel-api-key
+SUPABASE_API_KEY=your-supabase-api-key
+GITHUB_API_KEY=your-github-api-key
+```
 
 ## 🚀 Usage
 
-1. **Open the app**: Navigate to `http://localhost:9002`
-2. **Describe your app**: Enter a natural language description
-3. **Watch agents work**: Real-time multi-agent coordination
-4. **Preview instantly**: Live app preview with responsive testing
-5. **Edit code**: Built-in editor with syntax highlighting
-6. **Deploy**: One-click deployment to production
+1. **Access Application**: Navigate to configured URL
+2. **Describe Application**: Enter natural language description
+3. **Monitor Agents**: Real-time multi-agent coordination
+4. **Preview Results**: Live application preview
+5. **Edit Code**: Built-in Monaco editor
+6. **Deploy**: One-click enterprise deployment
 
-### Example Prompts
-- "Create a task manager app with login, dashboard, and dark mode"
-- "Build an e-commerce platform with product catalog and shopping cart"
-- "Make a social media dashboard with real-time analytics"
+### Example Enterprise Prompts
+- "Create a customer management system with authentication and analytics"
+- "Build a financial dashboard with real-time data and compliance features"
+- "Develop a project management platform with team collaboration"
 
 ## 🔧 Development
 
@@ -106,89 +121,132 @@ npm run dev
 ```
 src/
 ├── app/                 # Next.js app router
+│   ├── api/            # API routes with health checks
+│   └── globals.css     # Global styles
 ├── components/          # React components
 │   ├── ui/             # Reusable UI components
-│   ├── workflow-dashboard.tsx
-│   ├── agent-timeline.tsx
-│   ├── live-preview.tsx
-│   └── code-editor.tsx
+│   └── workflow-dashboard.tsx
 ├── lib/
 │   ├── agents/         # AI agent implementations
-│   ├── workflow-engine.ts
-│   └── types.ts
+│   └── workflow-engine.ts
 └── ai/
     ├── cerebras.ts     # Cerebras client
-    ├── services.ts     # API integrations
     └── flows/          # AI workflows
 ```
 
-### Key Components
-
-- **WorkflowEngine**: Orchestrates multi-agent execution
-- **OrchestratorAgent**: Analyzes user input and creates project plans
-- **CrewAgent**: Individual specialized agents for different tasks
-- **LivePreview**: Real-time app preview with device simulation
-- **CodeEditor**: Monaco-based code editing with download capabilities
+### Available Scripts
+```bash
+npm run dev          # Development server
+npm run build        # Production build
+npm run start        # Production server
+npm run lint         # Code linting
+npm run lint:fix     # Fix linting issues
+npm run typecheck    # TypeScript checking
+npm run clean        # Clean build artifacts
+```
 
 ## 🌐 Deployment
 
-### Vercel (Recommended)
+### Docker Production
+```bash
+# Build and deploy
+docker-compose up -d
+
+# Scale services
+docker-compose up -d --scale ai-app-builder=3
+
+# Monitor logs
+docker-compose logs -f
+```
+
+### Vercel Deployment
 ```bash
 # Deploy to Vercel
 vercel --prod
 
-# Set environment variables
+# Configure environment variables
 vercel env add CEREBRAS_API_KEY
+vercel env add NODE_ENV production
 ```
 
-### Manual Deployment
-```bash
-# Build for production
-npm run build
-
-# Start production server
-npm start
+### Enterprise Kubernetes
+```yaml
+# k8s deployment example
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-app-builder
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ai-app-builder
+  template:
+    spec:
+      containers:
+      - name: ai-app-builder
+        image: ai-app-builder:latest
+        ports:
+        - containerPort: 9002
 ```
 
-## 🔒 Environment Variables
+## 🔒 Security
 
-```bash
-# Required
-CEREBRAS_API_KEY=your-cerebras-api-key
+- **Input Validation**: All user inputs validated and sanitized
+- **Security Headers**: CSRF, XSS, and clickjacking protection
+- **Rate Limiting**: API endpoint protection
+- **Secret Management**: Environment-based configuration
+- **Docker Security**: Non-root user, minimal attack surface
 
-# Optional
-VERCEL_API_KEY=your-vercel-token
-SUPABASE_API_KEY=your-supabase-key
-GITHUB_API_KEY=your-github-token
-```
+See [SECURITY.md](SECURITY.md) for detailed security policies.
 
 ## 🤝 Contributing
 
+We welcome enterprise contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create feature branch
+3. Follow coding standards
+4. Add tests and documentation
+5. Submit pull request
+
+## 📊 Monitoring
+
+### Health Checks
+```bash
+# Application health
+curl http://localhost:9002/api/health
+
+# Docker health
+docker-compose ps
+```
+
+### Performance Monitoring
+- Built-in Next.js analytics
+- Docker container metrics
+- Custom performance tracking
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 🆘 Enterprise Support
 
-- **Documentation**: Check the `/docs` folder for detailed guides
-- **Issues**: Report bugs via GitHub Issues
-- **Discussions**: Join community discussions
+- **Documentation**: Comprehensive guides in `/docs`
+- **Issues**: GitHub Issues for bug reports
+- **Security**: security@yourcompany.com
+- **Enterprise**: Contact for enterprise licensing
 
 ## 🎯 Roadmap
 
-- [ ] Advanced code editing with IntelliSense
-- [ ] Real-time collaboration features
-- [ ] Custom agent creation
-- [ ] Template marketplace
-- [ ] Advanced deployment options
-- [ ] Performance monitoring integration
+- [ ] Advanced authentication and RBAC
+- [ ] Multi-tenant architecture
+- [ ] Advanced monitoring and alerting
+- [ ] Custom agent marketplace
+- [ ] Enterprise SSO integration
+- [ ] Advanced deployment pipelines
+- [ ] Performance optimization suite
 
 ---
 
-**Built with ❤️ using Cerebras AI and Next.js**
+**Enterprise-Ready AI App Builder** - Built with Cerebras AI and Next.js for production environments.
