@@ -10,11 +10,11 @@ export type Agent = {
 };
 
 export const AGENTS: Agent[] = [
-  { id: 'architect', name: 'System Architect', description: 'Designing app structure', icon: Network },
+  { id: 'devops', name: 'DevOps Engineer', description: 'Suggesting app name', icon: Rocket },
+  { id: 'architect', name: 'System Architect', description: 'Designing app structure & features', icon: Network },
   { id: 'frontend', name: 'Frontend Developer', description: 'Building user interface', icon: Paintbrush },
   { id: 'backend', name: 'Backend Developer', description: 'Creating API endpoints', icon: Cog },
   { id: 'database', name: 'Database Engineer', description: 'Setting up data models', icon: Database },
-  { id: 'devops', name: 'DevOps Engineer', description: 'Configuring deployment', icon: Rocket }
 ];
 
 export type ApiService = {

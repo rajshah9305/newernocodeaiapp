@@ -83,6 +83,14 @@ export default function AIAppForgePage() {
         ? { ...a, status, progress: progress !== undefined ? progress : a.progress } 
         : a
     ));
+    // Update overall progress based on completed agents
+    setGenerationProgress(prev => {
+      const completedCount = agentStates.filter(a => a.status === 'complete' || a.status === 'error').length;
+      if (status === 'complete' || status === 'error') {
+        return ((completedCount + 1) / AGENTS.length) * 100;
+      }
+      return (completedCount / AGENTS.length) * 100;
+    });
   };
   
   const runAgent = async (agentId: string, duration: number, task?: () => Promise<any>) => {
@@ -91,29 +99,28 @@ export default function AIAppForgePage() {
   
     const startTime = Date.now();
     let result;
-  
-    const updateProgress = () => {
-      const elapsedTime = Date.now() - startTime;
-      const progress = Math.min(Math.floor((elapsedTime / duration) * 100), 99);
-      updateAgentState(agentId, 'working', progress);
-      setGenerationProgress(prev => Math.max(prev, prev + 1));
-    };
-  
-    const interval = setInterval(updateProgress, 100);
+
+    // While task is running, simulate progress visually
+    const progressInterval = setInterval(() => {
+        const elapsedTime = Date.now() - startTime;
+        const progress = Math.min(Math.floor((elapsedTime / duration) * 100), 99);
+        updateAgentState(agentId, 'working', progress);
+    }, 150);
   
     try {
       if (task) {
         result = await task();
       } else {
+        // Fallback for non-AI tasks to simulate work
         await new Promise(resolve => setTimeout(resolve, duration));
       }
       updateAgentState(agentId, 'complete', 100);
     } catch (error) {
       console.error(`Agent ${agentId} failed:`, error);
       updateAgentState(agentId, 'error', 100);
-      throw error;
+      throw error; // Propagate error to stop the generation process
     } finally {
-      clearInterval(interval);
+      clearInterval(progressInterval);
       setActiveAgent(null);
     }
   
@@ -137,12 +144,11 @@ export default function AIAppForgePage() {
     setGenerationProgress(0);
 
     startTransition(async () => {
+      let appNameResult, featuresResult;
       try {
-        const [appNameResult, featuresResult] = await Promise.all([
-          runAgent('devops', 1000, () => suggestAppName({ appDescription })),
-          runAgent('architect', 1000, () => generateFeatures({ appDescription })),
-        ]);
-        
+        // Run agents sequentially to simulate a real workflow
+        appNameResult = await runAgent('devops', 1500, () => suggestAppName({ appDescription }));
+        featuresResult = await runAgent('architect', 1500, () => generateFeatures({ appDescription }));
         await runAgent('frontend', 2000);
         await runAgent('backend', 2000);
         await runAgent('database', 1500);
@@ -154,7 +160,6 @@ export default function AIAppForgePage() {
           deployment: "Vercel",
           deploymentReady: true,
           features: featuresResult.features,
-          // These will be populated by the useEffect below
           components: 0,
           pages: 0,
           apiEndpoints: 0,
