@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "env": {
+    "CEREBRAS_API_KEY": "@cerebras-api-key"
+  },
+  "functions": {
+    "src/app/**/*.{js,ts,jsx,tsx}": {
+      "maxDuration": 30
+    }
+  }
+}
